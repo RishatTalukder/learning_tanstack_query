@@ -220,3 +220,284 @@ YOu restart the server and after opening it in the browser you should see a floa
 
 When you click it it'll automatically open a tab section where you can see a lot of information about your queries.
 
+ANND THE SETUP IS DONE. WELL, THAT TOOK LONGER THAN I EXPECTED.😬
+
+Now, let's get into the action.
+
+# Introduction to Tanstack Query
+
+## What is it?
+
+`Tanstack query(Formally known as react query)` is like a global state manager for data fetching and caching.
+
+You know that when you are fetching data from the server you have to make a request and wait for the response and there can be different possible situations, mainly:
+
+- Loading
+- Success
+- Error
+
+Then you have to set it up a side-effect using useEffect hook to activate the fetching logic when a component is starting. 
+
+This is generally how things goes. 
+
+Well, tanstack query does it all for you and many more. It'll handle all the needed states and give extra features that can be a little tougher to implement by yourself.
+
+## How to use it?
+
+First let's fetch the data using the traditional methods. 
+
+I'll make a api configuration file so that I don't have to write the same code again and again.
+
+Make a new file named `api.ts` in your `src` folder.
+
+```tsx {.line-numbers}
+//src/api.ts
+import axios from "axios";
+
+export const api = axios.create({
+    baseURL: "http://localhost:3000/",
+});
+```
+
+Now, I can use this `api` object to send requests to the json server at `http://localhost:3000/`. I won't have to write the same code again and again.
+
+Now, let's get the data from the `/users` endpoint and render it in the app.
+
+```tsx {.line-numbers}
+//src/App.tsx
+import { useEffect, useState } from "react";
+import { api } from "./api";
+
+function App() {
+  // types for the data
+  type dataType = {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+  };
+
+  // states I have to use
+  const [data, setData] = useState<dataType[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  // function to fetch the data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get<dataType[]>("/users");
+      setData(res.data);
+    } catch (error) {
+      setError(error as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // side-effect to fetch the data when loading
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+
+  // checking the states
+  if (loading) return <div>Loading...</div>;
+
+  if (error) return <div>Error: {error.message}</div>;
+
+  if (!data) return <div>No data</div>;
+
+  //finally render the data
+  return (
+    <div>
+      {data.map((user) => (
+        <div key={user.id}>
+          <h2>{user.name}</h2>
+          <p>{user.email}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default App;
+```
+
+This is what a general data fetching logic looks like. 4-5 steps each time. If you are a little experienced with react, you already know whats going on here.
+
+1. Set the states for loading, error and data.
+2. Create a function to fetch the data that will set the states to loading to true and try to fetch the data from the api. If successful, set the data state to the response data. If not, set the error state to the error. Finally, set the loading state to false.
+3. Check every state and return the appropriate component.
+
+That's how it normally works. Now, let's see how to use tanstack query.
+
+```tsx {.line-numbers}
+//src/App.tsx
+import { useEffect, useState } from "react";
+import { api } from "./api";
+import { useQuery } from "@tanstack/react-query";
+
+function App() {
+  // types for the data
+  type dataType = {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+  };
+
+  // using tanstack query to get all the previous states directly
+  const { data, error, isPending } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.get<dataType[]>("/users");
+      return res.data;
+    },
+  });
+
+  // checking the states
+  if (isPending) return <div>Loading...</div>;
+
+  if (error) return <div>Error: {error.message}</div>;
+
+  if (!data) return <div>No data</div>;
+
+  //finally return the data
+  return (
+    <div>
+      {data.map((user) => (
+        <div key={user.id}>
+          <h2>{user.name}</h2>
+          <p>{user.email}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default App;
+```
+
+This is the same logic as before but using tanstack query. Just one hook doing all the heavy lifting.  Now, the main part is that I removed the `useState` and `useEffect` hooks completely and the all the needed states are given to me directly from tanstack query.
+
+> PS: in tanstack query the loading state is called `isPending`.
+
+now, let's break it down.
+
+# The Query Object
+
+Let's analyze the `useQuery` hook.
+
+```tsx {.line-numbers}
+//src/App.tsx
+const { data, error, isPending } = useQuery({
+  queryKey: ["users"],
+  queryFn: async () => {
+    const res = await api.get<dataType[]>("/users");
+    return res.data;
+  },
+});
+```
+
+The `useQuery` hook takes an object as a parameter and inside that object you mainly have to pass 2 things.
+
+- The `queryKey` which is an array of strings that will be used to identify the query.
+- The `queryFn` which is a function that will be used to fetch the data.
+
+Let's talk about what the useQuery hook returns.
+
+# What happens when you use the useQuery hook?
+
+First the useQuery runs the `queryFn` and if successful it returns what is returned from the `queryFn` to the `data` state. 
+
+That's why I returned `res.data` from the `queryFn`. It's exactly like the try block in the `fetchData` function.
+
+useQury hook will automatically set the `isPending` state to true while the `queryFn` is running and will set it to false once the `queryFn` is done.
+
+Adn if the `queryFn` throws an error, it will set the `error` state to the error.
+
+Exactly what we manually did with manual use of `useState` and `useEffect`.
+
+So, the useQuery hook will return a `useQueryResult` object that contains the `data`, `error` and `isPending` states.
+
+And this object can have a looot of other properties that can be used to control the query. 
+
+Just take a look at the [documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery).
+
+This query object will have attributes like `data`, `isPending`, `error`, `fetchStatus`, `isFetching` and many more.
+
+You can use these states and function for you specific needs.
+
+And also this object is returned by other query hooks like `useQueries`. `useQueryClient` or `useSuspenseQuery`.
+
+## What does the `queryKey` do?
+
+The `queryKey` is an array of strings that will be used to identify the query. It's important to use a unique key for each query.
+
+Let's make a button to fetch the data again when we click on it.
+
+```tsx {.line-numbers}
+//src/App.tsx
+...
+
+function App() {
+  ...
+
+  const { data, error, isPending, refetch } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.get<dataType[]>("/users");
+      return res.data;
+    },
+  });
+
+...
+```
+
+Here, I'm using the `refetch` function from the `useQueryResult` object. This function will refetch the data.
+
+Now we, can just add button to trigger the `refetch` function.
+
+```tsx {.line-numbers}
+//src/App.tsx
+...
+
+  //finally return the data
+  return (
+    <div>
+      ...
+      <button onClick={() => refetch()}>Re-fetch</button>
+    </div>
+  );
+...
+```
+
+And that's it!
+
+Now, go open the frontend in your browser and click the re-fetch button. You'll see that nothing is being re-fetched.
+
+This because of the `queryKey`. The `queryKey` is used to identify the query and as we are re-fetching the same query and nothing has changed the react-query will use the cached data. If anything have changed is the data. You should have seen the loading icon while the data was being fetched.
+
+
+This is awesome right? The useQuery hook is doing almost all of the heavy lifting for us.
+
+So, queryKey property is a unique key that will be used to identify the query. It's important to use a unique key for each query.
+
+Now, if you really want to see if the re-fetch is happening or not you can destructure the `isRefetching` state from the `query` object and check if it's true or false.
+
+This state is set to true when the query is being refetched.
+
+Try it out yourself.
+
+We'll get to know more properties of this object as we progress through this article. But time to go deeper into the useQuery hook.
+
+# Query Options
+
+I'll restructure some things before we get going.
+
+It's best practice to not write the query function directly in the useQuery hook. Instead, write it in a separate function and pass it as a prop to the useQuery hook.
+
+I'll put the query from the first example in the `fetchUsers` function and pass it as a prop to the useQuery hook.
+
+in the 
