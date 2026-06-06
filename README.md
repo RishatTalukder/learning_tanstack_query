@@ -82,6 +82,42 @@ Also, if you are using `vs code` you should install the `eslint plugin`.
 pnpm add -D @tanstack/eslint-plugin-query
 ```
 
+One last thing, a temporary backend server. We can do that using `json-server`.
+
+```bash
+pnpm add json-server
+```
+
+Now, make a new file named `db.json` in your `root` project folder. It's a jason file that will hold some temporary data.
+
+```json
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        }
+    ]
+}
+```
+
+As, you can see that here I have a `users` property inside the `db.json` file and it has an array of users. The properties inside the json will become the endpoint for that data.
+
+Run this command:
+
+```bash
+npx json-server db.json
+```
+
+This will start the server and you can access it by typing `http://localhost:3000` in your browser.
+
+Here, if you want to access the users array you have to add `/users` to the end of the url. So, the url will be `http://localhost:3000/users`.
+
+> Try it out, you'll see a list of users in the browser.
+
+
 ## Integrate tanstack query in the project
 
 First things first, after all the installations are done, open the `src` folder of your project and remove all the files except `App.jsx/App.jx/App.ts/App.tsx` and `main.jsx/main.jx/main.ts/main.tsx` files.
@@ -183,3 +219,4 @@ createRoot(document.getElementById("root")!).render(
 YOu restart the server and after opening it in the browser you should see a floating icon on the bottom right corner of your screen. 
 
 When you click it it'll automatically open a tab section where you can see a lot of information about your queries.
+
