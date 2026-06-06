@@ -5,6 +5,25 @@
             "name": "John Doe",
             "email": "2B7Pd@example.com",
             "password": "password123"
+        },
+        {
+            "id": 2,
+            "name": "Jane Doe",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        },
+        {
+            "id": 3,
+            "name": "Jack Die",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        },
+        {
+            "id": 4,
+            "name": "Bob dope",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
         }
+
     ]
 }

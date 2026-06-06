@@ -242,6 +242,11 @@ This is generally how things goes.
 
 Well, tanstack query does it all for you and many more. It'll handle all the needed states and give extra features that can be a little tougher to implement by yourself.
 
+Tanstack query has three core concepts:
+- Queries
+- Mutations
+- Query Invalidation
+
 ## How to use it?
 
 First let's fetch the data using the traditional methods. 
@@ -477,7 +482,7 @@ And that's it!
 
 Now, go open the frontend in your browser and click the re-fetch button. You'll see that nothing is being re-fetched.
 
-This because of the `queryKey`. The `queryKey` is used to identify the query and as we are re-fetching the same query and nothing has changed the react-query will use the cached data. If anything have changed is the data. You should have seen the loading icon while the data was being fetched.
+This because of the `queryKey`. The `queryKey` is used to identify the query and as we are re-fetching the same query, it instantly displays the existing cached data so the UI remains interactive. If the newly fetched data has changed, TanStack Query automatically overwrites the cache and updates the React state to reflect the new data on the screen. If the fetched data is identical, it leaves the cache as-is and optimizes performance by preventing an unnecessary UI re-render
 
 
 This is awesome right? The useQuery hook is doing almost all of the heavy lifting for us.
@@ -500,4 +505,379 @@ It's best practice to not write the query function directly in the useQuery hook
 
 I'll put the query from the first example in the `fetchUsers` function and pass it as a prop to the useQuery hook.
 
-in the 
+Make a new file named `queryFunctions.ts` in your `src` folder.
+
+```tsx {.line-numbers}
+//src/queryFunctions.ts
+import { api } from "./api";
+
+export const fetchUsers = async () => {
+    const res = await api.get("/users");
+    return res.data;
+};
+```
+
+now, we can use this function as a prop to the useQuery hook.
+
+```tsx {.line-numbers}
+//src/App.tsx
+import { useEffect, useState } from "react";
+import { api } from "./api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUsers } from "./queryFunctions";
+
+function App() {
+  // types for the data
+  type dataType = {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+  };
+
+  const { data, error, isPending, refetch, isRefetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+
+  // checking the states
+  if (isPending) return <div>Loading...</div>;
+
+  if (error) return <div>Error: {error.message}</div>;
+
+  if (isRefetching) return <div>Re-fetching...</div>;
+
+  if (!data) return <div>No data</div>;
+
+  //finally return the data
+  return (
+    <div>
+      {data.map((user) => (
+        <div key={user.id}>
+          <h2>{user.name}</h2>
+          <p>{user.email}</p>
+        </div>
+      ))}
+      <button onClick={() => refetch()}>Re-fetch</button>
+    </div>
+  );
+}
+
+export default App;
+```
+
+This final code will work exactly the same as the previous one. The only difference is that we're passing the query function as a prop to the useQuery hook.
+
+One last thing is that I have to add some more `users` in the db.json file.
+
+```json
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        },
+        {
+            "id": 2,
+            "name": "Jane Doe",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        },
+        {
+            "id": 3,
+            "name": "Jack Die",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        },
+        {
+            "id": 4,
+            "name": "Bob dope",
+            "email": "2B7Pd@example.com",
+            "password": "password123"
+        }
+
+    ]
+}
+```
+
+And we can now learn more about the `useQuery` hook.
+
+## Multiple QueryKeys
+
+One thing that is very common in fetching data is getting that data ccording to a certain ID. For example, each of the users has an ID.
+
+We can fetch a single user information from `/users/:id` endpoint.
+
+> Json-server pre-configures the endpoints to add dynamic routes by getting the id of the objects in the array.
+
+Go ahead, type `http://localhost:3000/users/1` in your browser and you'll see the user information with Id 1.
+
+But what about fetching them using useQuery hook?
+
+We can follow, the same steps as we did in the first example.
+
+let's make a query function is the `queryFunctions.ts` file.
+
+```tsx {.line-numbers}
+import { api } from "./api";
+export type dataType = {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+  };
+
+export const fetchUsers = async () => {
+    const res = await api.get<dataType[]>("/users");
+    return res.data;
+};
+
+export const fetchUserById = async (id: number) => {
+    const res = await api.get<dataType>(`/users/${id}`);
+    return res.data;
+};
+```
+
+> I have added the `dataType` type to the `fetchUserById` function because Im working in typescript.
+
+Now, let's setup a new component for this example. Make a new folder in the src folder named `components`.
+
+Now, make a new component file named `RenderUser.tsx` in the `components` folder.
+
+```tsx {.line-numbers}
+//src/components/RenderUser.tsx
+import React, { useState } from "react";
+
+const RenderUser = () => {
+  const [id, setId] = useState(1);
+
+  return (
+    <div>
+      <input
+        type="number"
+        value={id}
+        onChange={(e) => setId(parseInt(e.target.value))}
+      />
+      <button>Get User</button>
+    </div>
+  );
+};
+
+export default RenderUser;
+
+```
+
+Here, I have setup a simple input field to get the user ID and a button to fetch the user.
+
+So, now we have to add it to the `App` component.
+
+```tsx {.line-numbers}
+//src/App.tsx
+import RenderUser from "./components/RenderUser";
+
+function App() {
+  return (
+    <div>
+      <RenderUser />
+    </div>
+  );
+}
+
+export default App;
+```
+
+I've commented out almost everything in the `App` component from exmple 1 because I want to keep it clean for this exmaple and now you should see a input field and a button rendered in the browser screen.
+
+From the first example, we know how to use the `useQuery` hook to fetch data.
+
+Now, What I want to do is enter a ID in the input field and then click the button to fetch the user.
+
+Now, we know how the `useQuery` hook works. Let's try it like the first example.
+
+```tsx {.line-numbers}
+//src/components/RenderUser.tsx
+import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { fetchUserById } from "../queryFunctions";
+
+const RenderUser = () => {
+  const [id, setId] = useState(1);
+
+  const { data, isPending, error } = useQuery({
+    queryKey: ["user"],
+    queryFn: () => fetchUserById(id),
+  });
+
+  return (
+    <div>
+      {isPending && <h1>Loading...</h1>}
+      {error && <h1>{error.message}</h1>}
+      {data && (
+        <div>
+          <h1>{data.name}</h1>
+          <h1>{data.email}</h1>
+          <h1>{data.password}</h1>
+        </div>
+      )}
+      <input
+        type="number"
+        value={id}
+        onChange={(e) => setId(parseInt(e.target.value))}
+      />
+      <button>Get User</button>
+    </div>
+  );
+};
+
+export default RenderUser;
+
+```
+
+> I'm checking the conditional states inside the RenderUser component because I don't want to break the UI or hide the input field whenever an error occurs. I want the input field to remain rendered at all times.
+
+In the original code, I passed id as a parameter to fetchUserById(id), expecting that updating the input would automatically run the fetch function again.
+
+If you test that setup, it works perfectly on the first load for User 1. However, changing the ID input afterward completely fails to update the user data on the screen.
+
+Why? Because the useQuery hook only activates automatically when its queryKey changes.
+
+> As a component mounts, the useQuery hook activates automatically. After that, it will only re-fetch if a value inside the queryKey changes (or due to background triggers like window refocus). 
+
+TanStack Query has no idea the dependencies changed. To fix this, the state variable must be included in the key.
+
+This way every time the input value changes, the queryKey will change and the useQuery hook will re-run.
+
+So, simply just add ["user", id] to the queryKey array and it should work.
+
+Nice right?
+
+Now, this is not what I wanted. I wanted to fetch the user when the button is clicked instead of when the input value changes.
+
+How, do we do that?
+
+We can add a `enabled` prop to the useQuery hook to stop it from automatically running.
+
+```tsx {.line-numbers}
+//src/components/RenderUser.tsx
+const { data, isPending, error, refetch } = useQuery({
+    queryKey: ["user", id],
+    queryFn: () => fetchUserById(id),
+    enabled: false,
+  });
+```
+
+This will stop the useQuery hook from automatically running.
+
+But the problem the query will never run if we don't use the `refetch` function. For now we can comment it out.
+
+Now, we laid the groundwork that wheneven id state will change the useQuery hook will re-run.
+
+So, first we need to stop that. This might seem a little counterintuitive but everything will eventually work out. Trust me on this. 
+
+> If we keep id inside both our typing input and the queryKey, TanStack Query gets confused the moment a user types. As you type a new number, the queryKey changes instantly. This resets the query status back to isPending and wipes your current data off the screen before you even get a chance to press the button!
+
+To fix this, we need to completely `separate` the id we are currently typing from the id we actually want to fetch.
+We do this by introducing a second state variable: fetchedId.
+
+```tsx {.line-numbers}
+// 1. This state tracks what the user is typing
+const [id, setId] = useState(1);
+// 2. This state ONLY updates when the button is actually clicked 
+const [fetchedId, setFetchedId] = useState<number | null>(null);
+
+```
+
+Now, instead of hooking useQuery up to our frantic typing input, we point it directly at fetchedId.
+
+```tsx {.line-numbers}
+const { data, isPending, error } = useQuery({
+  // Point the key and function to our submission state
+  queryKey: ["user", fetchedId],
+  queryFn: () => fetchUserById(fetchedId!),
+  
+  // Magic line: Stay idle until the user actually clicks the button for the first time
+  enabled: fetchedId !== null, 
+});
+```
+
+Look at how beautifully this solves all our problems at once:
+
+   1. **No accidental triggers**: Typing inside the input box updates id, but leaves fetchedId completely alone. The UI stays perfectly stable while typing.
+   2. **Strict button control**: The fetch only activates inside our button's handleGetUser function, where we explicitly call setFetchedId(id).
+   3. **Perfect caching**: Because fetchedId is in the queryKey, TanStack Query will cache every user individually (["user", 1], ["user", 2]). If you search for User 1, switch to User 2, and then search for User 1 again, it loads instantly from the cache without hitting your API a second time!
+
+By decoupling our UI state from our network trigger state, we get the absolute best of both worlds.
+
+
+And now, we can just add a handle click function to our button that will check if the `id` is valid or not. If it is, it will set the `fetchedId` state to the `id` value and when the `fetchedId` is not null, the query will run.
+
+```tsx {.line-numbers}
+const handleGetUser = () => {
+    if (!isNaN(id)) {
+      setFetchedId(id);
+    }
+  }
+```
+
+And now the only task is to bring this all togather.
+
+```tsx {.line-numbers}
+//src/components/RenderUser.tsx
+import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { fetchUserById } from "../queryFunctions";
+
+const RenderUser = () => {
+  const [id, setId] = useState(1);
+  const [fetchedId, setFetchedId] = useState<number | null>(null);
+
+  const { data, isPending, error } = useQuery({
+    queryKey: ["user", fetchedId],
+    queryFn: () => fetchUserById(fetchedId!),
+    enabled: fetchedId !== null,
+  });
+
+  const handleGetUser = () => {
+    if (!isNaN(id)) {
+      setFetchedId(id);
+    }
+  }
+
+  return (
+    <div>
+      {isPending && <h1>Loading...</h1>}
+      {error && <h1>{error.message}</h1>}
+      {data && (
+        <div>
+          <h1>{data.name}</h1>
+          <h1>{data.email}</h1>
+          <h1>{data.password}</h1>
+        </div>
+      )}
+      <input
+        type="number"
+        value={id}
+        onChange={(e) => setId(parseInt(e.target.value))}
+      />
+      <button onClick={()=>handleGetUser()}>Get User</button>
+    </div>
+  );
+};
+
+export default RenderUser;
+```
+
+> **Note**: The `handleGetUser` function is a simple function that checks if the `id` is a number, and if it is, it sets the `fetchedId` state to the `id` value.
+
+Everything should work how we wanted. The user data should only load when we click the button.
+
+Only one thing left to do. A simple bug, you should see a `loading...` text rendered on the screen even though nothing is loading all the time.
+
+This is because of the `isPending` state. It is a boolean state that is set to true when the query is loading, and false when it is done.
+
+In this case you can use `isFetching` instead of `isPending` which is a boolean state that is by default set to false. But In any state, if the query is fetching at any time (including background refetching) isFetching will be true.
+
+> **Note**: Is pending is related to the state of the `queryFn` function. It is only false if the queryFn is in `error` or `success` state. 
+
