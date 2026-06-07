@@ -2,6 +2,7 @@
 // import { api } from "./api";
 // import { useQuery } from "@tanstack/react-query";
 // import { fetchUsers } from "./queryFunctions";
+import { Suspense } from "react";
 import RenderUser from "./components/RenderUser";
 
 function App() {
@@ -60,7 +61,12 @@ function App() {
         </div>
       ))} */}
       {/* <button onClick={() => refetch()}>Re-fetch</button> */}
-      <RenderUser />
+      <Suspense
+      fallback={<h1>Loading...</h1>}
+      >
+        <RenderUser />
+      </Suspense>
+      
     </div>
   );
 }

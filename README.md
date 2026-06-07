@@ -1,6 +1,6 @@
 # Learning Tanstack Query
 
-I was doing a project and I stumbled upon this. And got some nice reviews from the community to here I go.
+I was doing a project and I stumbled upon this. And got some nice reviews from the community too. So, here I go.
 
 My name is `Md. Rishat Talukder` and this is `Learning Tanstack Query with ITVAYA`
 
@@ -881,3 +881,141 @@ In this case you can use `isFetching` instead of `isPending` which is a boolean 
 
 > **Note**: Is pending is related to the state of the `queryFn` function. It is only false if the queryFn is in `error` or `success` state. 
 
+Now, there are a lot of other properties we can pass in the `useQuery object`. And those can ne very useful for different situations. 
+
+The above exmpale is for `dependent querys` which are queries that depend on the results of another query. 
+
+There can be multiple queries that depend on the results of another query.
+
+Or Multiple queries that has to be fetched at the same time.
+
+Let's talk more about these.
+
+## Query Options
+
+By now I think you userstand that the objext passed inside the `useQuery` is the most important thing.
+
+This is called a `Query options object`.
+
+```tsx {.line-numbers}
+const { data, isPending, error } = useQuery({
+  queryKey: ["user", fetchedId],
+  queryFn: () => fetchUserById(fetchedId!),
+  enabled: fetchedId !== null,
+});
+```
+
+This query can be written separately as:
+
+```tsx {.line-numbers}
+const fetchIdQueryOption = {
+    queryKey: ["user", fetchedId],
+    queryFn: () => fetchUserById(fetchedId!),
+    enabled: fetchedId !== null,
+  };
+
+  const { data, isPending, error, isFetching } = useQuery(fetchIdQueryOption);
+```
+
+Because in the end it's just a simple object. You can export the object from other files and use it here if you want, it'll work the same. 
+
+Another better way to write this is using the `queryOptions` function.
+
+```tsx {.line-numbers}
+const fetchIdQueryOption = queryOptions({
+    queryKey: ["user", fetchedId],
+    queryFn: () => fetchUserById(fetchedId!),
+    enabled: fetchedId !== null,
+  });
+
+  const { ... } = useQuery(fetchIdQueryOption);
+```
+
+Whats the benifit of using this?
+
+Well, not much but it makes the code a little bit more readable and if you are using `typescript` then you can get type checking and property references. With plain object you won't get any of that.
+
+## Suspense Query
+
+Exactly the same as `useQuery` but with the `guerantee` that the data will be available.
+
+You can write it like this:
+
+```tsx {.line-numbers}
+const { data, isPending, error } = useSuspenseQuery({
+  queryKey: ["user", fetchedId],
+  queryFn: () => fetchUserById(fetchedId!),
+  enabled: fetchedId !== null,
+});
+```
+
+You know that `useQuery` hook can return the data as `unavailable` because it is async. But with the `useSuspenseQuery` hook will wait for the data to be available before rendering the component. 
+
+This hook works with the `react suspense` feature. You have to wrap the <RenderUser /> component with the <Suspense /> component in the `App` component.
+
+You should see that the UI is now waiting for the data to be available before rendering the component.
+
+> useSuspenseQuery hook completely ignores the `enabled` prop.
+
+So, in this case the component will not work if you use `useSuspenseQuery` instead of `useQuery`.
+
+> Enabled prop stops the useQury hook to fetch the data if the ID is null. But now as either way useSuspenseQuery will fetch the data, it'll show an error because there is no `/users/null` endpoint.
+
+## Queries
+
+Let's say you have a component where multiple query has to be done simultaneously.
+
+You can use the `useQueries` hook to do that.
+
+Everything stays the same.
+
+```tsx {.line-numbers}
+const querieOptions1 = queryOptions({
+    queryKey: ...,
+    queryFn: ...,
+    enabled: ...,  
+})
+
+const querieOptions2 = queryOptions({
+    queryKey: ...,
+    queryFn: ...,
+    enabled: ...,  
+})
+```
+
+You can define these re-usable query options objects and you can pass these as a array to the `useQueries` hook.
+
+```tsx {.line-numbers}
+
+const UseQueriesExample = useQueries({
+    queries: [querieOptions1, querieOptions2]
+})
+
+```
+
+> **Note**: The `useQueries` will take an object and inside that object you can pass a property called `queries` which is an array of query options objects.
+
+The `useQueries` hook will return an array of objects. Each object willl have the results for each query passed in the `queries` array.
+
+```tsx {.line-numbers}
+
+const [result1, result2] = useQueries({
+    queries: [querieOptions1, querieOptions2]
+})
+
+```
+
+If you want you can destructure the results from the array directly.
+
+```tsx {.line-numbers}
+
+const [
+  { data: data1, isPending: isPending1, error: error1 },
+  { data: data2, isPending: isPending2, error: error2 },
+] = useQueries({
+    queries: [querieOptions1, querieOptions2]
+})
+
+```
+
+And that's it. For the very basics. You can also use `useSuspenseQueries` for multiple suspense quries and they will work the same way as `useSuspenseQuery` hook. Try it out yourself.
