@@ -2,8 +2,9 @@
 // import { api } from "./api";
 // import { useQuery } from "@tanstack/react-query";
 // import { fetchUsers } from "./queryFunctions";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import RenderUser from "./components/RenderUser";
+import StaleFrsh from "./components/StaleFrsh";
 
 function App() {
   // // types for the data
@@ -52,6 +53,8 @@ function App() {
   // if (!data) return <div>No data</div>;
 
   //finally return the data
+
+  const [toggle, setToggle] = useState(true);
   return (
     <div>
       {/* {data.map((user) => (
@@ -61,12 +64,13 @@ function App() {
         </div>
       ))} */}
       {/* <button onClick={() => refetch()}>Re-fetch</button> */}
-      <Suspense
+      {/* <Suspense
       fallback={<h1>Loading...</h1>}
       >
         <RenderUser />
-      </Suspense>
-      
+      </Suspense> */}
+      {toggle && <StaleFrsh />}
+      <button onClick={() => setToggle(!toggle)}>Toggle</button>
     </div>
   );
 }

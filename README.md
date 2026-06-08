@@ -1019,3 +1019,100 @@ const [
 ```
 
 And that's it. For the very basics. You can also use `useSuspenseQueries` for multiple suspense quries and they will work the same way as `useSuspenseQuery` hook. Try it out yourself.
+
+# Stale And Fresh Data
+
+Okay, Time to dig deeper.
+
+You guys already know that you have to pass the `queryKey` to the `useQuery` hook. 
+
+Let's say you have two different `useQuery` hooks with `["users"]` and `["posts"]` query key.
+
+When this queries are activated tanstack uses these key to keey track of the `data`. This is called `caching`.
+
+Now, whever you use the same queries again the data will be fetched from the cache first and after the data is fetched the `data state` will update.
+
+Now, how do you define which stays in cache and re-used, for how long?
+
+## Stale Time
+
+In tanstack query you can define the `staleTime` option for each query.
+
+This state time defines if the component should use the cached data completely or use the queryFn to fetch the data.
+
+> Stale time is a number in milliseconds to define how long the data should be cached.
+
+```tsx {.line-numbers}
+queryOptions({
+    queryKey: ...,
+    queryFn: ...,
+    staleTime: 60000 // 1 minute
+})
+```
+
+Here, I'm setting staletime to 1 minute by passing 60000 milliseconds which 60 seconds.
+
+This tells, tanstack query to use the cached data for 1 minute. And in that 1 minute if the query is re-run, tanstack will not use the queryFn to do network requests.
+
+Let's try it out.
+
+I'll setup a new component in the `components` folder named `StaleFresh.tsx`.
+
+```tsx {.line-numbers}
+//src/components/StaleFresh.tsx
+
+import React from 'react'
+import { fetchUsers } from '../queryFunctions'
+import { useQuery } from '@tanstack/react-query'
+
+const StaleFresh = () => {
+    const {data} = useQuery({
+        queryKey: ['users'],
+        queryFn: fetchUsers,
+        staleTime: 60000
+    })
+  return (
+    <div>
+      This is the data
+      {JSON.stringify(data)}
+    </div>
+  )
+}
+
+export default StaleFresh
+```
+
+This component will send a request to the backend to get the data and as I've set the staleTime to 1 minute it'll keep the data fresh for 1 minute.
+
+
+Now, I'll setup a toggle button to mount and unmount the component.
+
+```tsx {.line-numbers}
+...
+function App() {
+
+  const [toggle, setToggle] = useState(true);
+  return (
+    <div>
+      {toggle && <StaleFersh />}
+      <button onClick={() => setToggle(!toggle)}>Toggle</button>
+    </div>
+  );
+}
+
+export default App;
+```
+
+Now, got to open you browser and go to the inspect tools network tab. Select the `fetch/XHR` tab and click the button to toggle the component. You'll see that the data is being re-fetched from cache every time the component is mounted but no network requests are being made.
+
+You can also confirm that the data in cache is fresh by using the dev tools.
+
+You can wait 1 min and toggle the component again and you'll see that the data is being re-fetched but this time the network request is being made.
+
+So, 
+
+> Stale time defines how long cached data of a query should be kept fresh.
+
+> Fresh data means, when A data is fresh the queryFn of that query will not be called. 
+
+> When the staleTime is over, the cached data becomes stale and the queryFn will be called to fetch the data. And the cycle continues... 
