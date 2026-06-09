@@ -6,7 +6,7 @@ const StaleFrsh = () => {
     const {data} = useQuery({
         queryKey: ['users'],
         queryFn: fetchUsers,
-        staleTime: 60000
+        staleTime: Infinity
     })
   return (
     <div>

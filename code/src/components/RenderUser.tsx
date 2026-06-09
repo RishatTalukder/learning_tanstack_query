@@ -1,6 +1,7 @@
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { fetchUserById } from "../queryFunctions";
+import { useQueryClient } from "@tanstack/react-query";
 
 const RenderUser = () => {
   const [id, setId] = useState(1);

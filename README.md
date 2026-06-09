@@ -1116,3 +1116,125 @@ So,
 > Fresh data means, when A data is fresh the queryFn of that query will not be called. 
 
 > When the staleTime is over, the cached data becomes stale and the queryFn will be called to fetch the data. And the cycle continues... 
+
+One nice thing is, If you are fetching some static data from backend that will never change you can set the `staleTime to Infinity`.
+
+```tsx {.line-numbers}
+
+const {data} = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+    staleTime: Infinity
+})
+
+```
+
+> This will keep ur data fresh forever and will fecth data only at start up but never again after that.
+
+Now, this bring me to another scenario.
+
+## Query invalidation
+
+I think everyone has seen this in their react app.
+
+You make a request to fetch data or delete data and you think that the UI will update accordingly.
+
+But nothing happends to the UI untill you refresh the page. This is because a request is not connected to the UI. It is a database operation.
+
+So, whatever happens in the database the current UI should not be affected by it, thats the correct behavior right?
+
+Same goed for tanstack query.
+
+Let's say you have a function named `deleteUser` that deletes a user from the database.
+
+```tsx {.line-numbers}
+const deleteUser = (id) => {
+  await axios.delete(`/users/${id}`);
+}
+```
+
+Now, you have a component that shows a list of users.
+
+```tsx {.line-numbers}
+const Component = () => {
+  const { data } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+
+  return (
+    <ul>
+      {data.map((user) => (
+        <li key={user.id}>
+          {user.name} - {user.email}
+          <button onClick={() => deleteUser(user.id)}>Delete</button>
+        </li>
+      ))}
+    </ul>
+  );
+};
+```
+
+> Here, each user is rendered with a delete button that calls the `deleteUser` function what should delete the user from the database.
+
+This will not update the UI untill you call the `refetch` function for the `useQuery` hook.
+
+So, we can use the `refetch` function to update the UI but that is not the correct way to do it.
+
+The correct way to do it is to use the `invalidateQueries` function.
+
+```tsx {.line-numbers}
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const Component = () => {
+  const { data } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+  });
+
+  const queryClient = useQueryClient();
+
+  const handleDelete = async (id) => {
+    await deleteUser(id);
+    queryClient.invalidateQueries({
+      queryKey: ["users"],
+    });
+  };
+
+  return (
+    <ul>
+      {data.map((user) => (
+        <li key={user.id}>
+          {user.name} - {user.email}
+          <button onClick={() => handleDelete(user.id)}>Delete</button>
+        </li>
+      ))}
+    </ul>
+  );  
+};
+
+```
+
+> InvalidateQueries is method of the queryClient object. That's we have to use the `useQueryClient` hook to get the queryClient object.
+
+And I made a function called `handleDelete` that calls the `deleteUser` function and then calls the `invalidateQueries` function to invalidate the query.
+
+> invalidateQueries takes an object where you must pass the `queryKey` which is an array of strings that will be used to identify the query and that query will be invalidated and refetched through the network.
+
+Now, let's understand why I'm using the `invalidateQueries` function instead of the `refetch` function.
+
+1. **Invalidation is Smart (Respects staleTime), refetch() is Brutalrefetch() forces a network request immediately, no matter what**. 
+  - It completely `ignores` your `staleTime` configurations. Even if you fetched the exact same data one second ago and it is perfectly "fresh," refetch() will blindly hit your server again.
+  - invalidateQueries() marks the data as "stale" (expired) first. It tells TanStack Query: "Hey, the data for this key is now old and dirty." 
+    - If the component using that query is currently visible on the screen, TanStack Query will instantly refetch it in the background.
+    - If the component is not on the screen (e.g., it's on a different page), TanStack Query will not fetch it right away. It will wait until the user navigates back to that page before pulling the fresh data. This saves massive amounts of server bandwidth.
+
+2. Invalidation scale across your entire app (The Network Effect) 
+
+  - Imagine you have a dashboard. You have a `UserProfile` component at the top of the screen, and a SettingsForm component at the bottom of the screen. Both rely on the ["user", id] data.
+
+  - If you change the user's name in the SettingsForm and call a manual refetch() inside that form, only that specific instance of the hook refetches. The UserProfile component at the top of the screen might stay stuck showing the old name.
+
+  - If you use queryClient.invalidateQueries({ queryKey: ["user", id] }), TanStack Query `broadcasts` a message to the entire application. Every single component on the screen that cares about ["user", id] will simultaneously `refresh` itself to show the brand-new data.
+
+3. Invalidation works seamlessly with `Mutations`. I'll talk more about mutations right after this. 
