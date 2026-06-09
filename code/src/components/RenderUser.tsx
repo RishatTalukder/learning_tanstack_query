@@ -1,19 +1,14 @@
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { fetchUserById } from "../queryFunctions";
+import { fetchIdQueryOption, fetchUserById } from "../queryFunctions";
 import { useQueryClient } from "@tanstack/react-query";
 
 const RenderUser = () => {
   const [id, setId] = useState(1);
   const [fetchedId, setFetchedId] = useState<number | null>(null);
 
-  const fetchIdQueryOption = queryOptions({
-    queryKey: ["user", fetchedId],
-    queryFn: () => fetchUserById(fetchedId!),
-    enabled: fetchedId !== null,
-  });
 
-  const { data, isPending, error, isFetching } = useQuery(fetchIdQueryOption);
+  const { data, isPending, error, isFetching } = useQuery(fetchIdQueryOption(fetchedId!));
 
   const handleGetUser = () => {
     if (!isNaN(id)) {

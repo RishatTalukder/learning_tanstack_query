@@ -935,6 +935,50 @@ Whats the benifit of using this?
 
 Well, not much but it makes the code a little bit more readable and if you are using `typescript` then you can get type checking and property references. With plain object you won't get any of that.
 
+Now, one more thing you can do is re-use the `queryOptions` object in multiple places.
+
+Let's say you move the `queryOptions` object to the `queryFunctions` file.
+
+```tsx {.line-numbers}
+//src/queryFunctions.ts
+const fetchIdQueryOption = queryOptions({
+    queryKey: ["user", fetchedId],
+    queryFn: () => fetchUserById(fetchedId!),
+    enabled: fetchedId !== null,
+  });
+```
+
+Naturally this won't work because the `queryOptions` is taking `fetchId` state as an argument but the `fetchId` state is not in the `queryFunctions` file.
+
+So, you can turn the `fetchIdQueryOption` object into a function that returns the `queryOptions` object.
+
+```tsx {.line-numbers}
+//src/queryFunctions.ts
+const fetchIdQueryOption = (fetchedId: number) => queryOptions({
+    queryKey: ["user", fetchedId],
+    queryFn: () => fetchUserById(fetchedId!),
+    enabled: fetchedId !== null,
+  });
+```
+
+and now you can import and pass the `fetchedId` state to the `fetchIdQueryOption` function.
+
+```tsx {.line-numbers}
+//src/components/RenderUser.tsx
+const RenderUser = () => {
+  const [id, setId] = useState(1);
+  const [fetchedId, setFetchedId] = useState<number | null>(null);
+
+
+  const { data, isPending, error, isFetching } = useQuery(fetchIdQueryOption(fetchedId!));
+
+  ...
+
+}
+```
+
+As you can see, instead of passing the `fetchedIdQueryOption` object to the `useQuery` hook, you pass the `fetchedIdQueryOption` **FUNCTION** to the `useQuery` hook and inside this function you pass the `fetchedId` state and eveything works just fine.
+
 ## Suspense Query
 
 Exactly the same as `useQuery` but with the `guerantee` that the data will be available.

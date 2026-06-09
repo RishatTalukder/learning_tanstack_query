@@ -5,6 +5,7 @@
 import { Suspense, useState } from "react";
 import RenderUser from "./components/RenderUser";
 import StaleFrsh from "./components/StaleFrsh";
+import Invalidation from "./components/Invalidation";
 
 function App() {
   // // types for the data
@@ -69,8 +70,10 @@ function App() {
       >
         <RenderUser />
       </Suspense> */}
+      {/* <RenderUser /> */}
       {toggle && <StaleFrsh />}
       <button onClick={() => setToggle(!toggle)}>Toggle</button>
+      <Invalidation />
     </div>
   );
 }
