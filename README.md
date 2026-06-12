@@ -43,7 +43,7 @@ pnpm create vite
 
 After running this command you'll be prompted to enter the name of your project.
 
-I entered `code`. That's why you'll see a folder named `code` in the [repository](https://github.com/RishatTalukder/learning_tanstack_query). It's the react app. 
+I entered `code`. That's why you'll see a folder named `code` in the [repository](https://github.com/RishatTalukder/learning_tanstack_query). It's the react app.
 
 You can name the app whatever you like.
 
@@ -92,14 +92,14 @@ Now, make a new file named `db.json` in your `root` project folder. It's a jason
 
 ```json
 {
-    "users": [
-        {
-            "id": 1,
-            "name": "John Doe",
-            "email": "2B7Pd@example.com",
-            "password": "password123"
-        }
-    ]
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "2B7Pd@example.com",
+      "password": "password123"
+    }
+  ]
 }
 ```
 
@@ -117,7 +117,6 @@ Here, if you want to access the users array you have to add `/users` to the end 
 
 > Try it out, you'll see a list of users in the browser.
 
-
 ## Integrate tanstack query in the project
 
 First things first, after all the installations are done, open the `src` folder of your project and remove all the files except `App.jsx/App.jx/App.ts/App.tsx` and `main.jsx/main.jx/main.ts/main.tsx` files.
@@ -130,15 +129,15 @@ Your `main.jsx/main.jx/main.ts/main.tsx` file should look something like this:
 
 ```tsx {.line-numbers}
 //src/main.tsx
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
   </StrictMode>,
-)
+);
 ```
 
 Your `App.tsx` file should look something like this:
@@ -154,7 +153,7 @@ export default App;
 
 Now, we have a clean app and we should now integrate tanstack query in it.
 
-First, I would recomment you go to the [documentations](https://tanstack.com/query/latest/docs/framework/react/overview). Read the documentation from `overview`  to `Devtools`. 
+First, I would recomment you go to the [documentations](https://tanstack.com/query/latest/docs/framework/react/overview). Read the documentation from `overview` to `Devtools`.
 
 > Reading docs is an important skill for any developer.
 
@@ -178,13 +177,12 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-Now, let's break it down. 
+Now, let's break it down.
 
 - First, we import the `QueryClient` and `QueryClientProvider` from `@tanstack/react-query`.
 - Then, we create a new instance of `QueryClient`. This query client object will hold the much needed information for tanstack query to work.
 - Now, we pass this `queryClient` object to the `QueryClientProvider` component. This component will act as a context provider for all the data and making tanstack query work everywhere in the whole app.
 - Then, we wrap our `App` component in the `QueryClientProvider` component. This will make tanstack query work in our app.
-
 
 ## Optional but recommended: Adding devtools
 
@@ -195,6 +193,7 @@ run this following command in terminal:
 ```bash
 pnpm add @tanstack/react-query-devtools
 ```
+
 Now, open the `main.tsx` file and import the `ReactQueryDevtools` component from `@tanstack/react-query-devtools` and right above your `App` component render the `ReactQueryDevtools` component.
 
 ```tsx {.line-numbers}
@@ -216,7 +215,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-YOu restart the server and after opening it in the browser you should see a floating icon on the bottom right corner of your screen. 
+YOu restart the server and after opening it in the browser you should see a floating icon on the bottom right corner of your screen.
 
 When you click it it'll automatically open a tab section where you can see a lot of information about your queries.
 
@@ -236,20 +235,21 @@ You know that when you are fetching data from the server you have to make a requ
 - Success
 - Error
 
-Then you have to set it up a side-effect using useEffect hook to activate the fetching logic when a component is starting. 
+Then you have to set it up a side-effect using useEffect hook to activate the fetching logic when a component is starting.
 
-This is generally how things goes. 
+This is generally how things goes.
 
 Well, tanstack query does it all for you and many more. It'll handle all the needed states and give extra features that can be a little tougher to implement by yourself.
 
 Tanstack query has three core concepts:
+
 - Queries
 - Mutations
 - Query Invalidation
 
 ## How to use it?
 
-First let's fetch the data using the traditional methods. 
+First let's fetch the data using the traditional methods.
 
 I'll make a api configuration file so that I don't have to write the same code again and again.
 
@@ -260,7 +260,7 @@ Make a new file named `api.ts` in your `src` folder.
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: "http://localhost:3000/",
+  baseURL: "http://localhost:3000/",
 });
 ```
 
@@ -304,7 +304,6 @@ function App() {
   useEffect(() => {
     fetchData();
   }, []);
-
 
   // checking the states
   if (loading) return <div>Loading...</div>;
@@ -384,7 +383,7 @@ function App() {
 export default App;
 ```
 
-This is the same logic as before but using tanstack query. Just one hook doing all the heavy lifting.  Now, the main part is that I removed the `useState` and `useEffect` hooks completely and the all the needed states are given to me directly from tanstack query.
+This is the same logic as before but using tanstack query. Just one hook doing all the heavy lifting. Now, the main part is that I removed the `useState` and `useEffect` hooks completely and the all the needed states are given to me directly from tanstack query.
 
 > PS: in tanstack query the loading state is called `isPending`.
 
@@ -414,7 +413,7 @@ Let's talk about what the useQuery hook returns.
 
 # What happens when you use the useQuery hook?
 
-First the useQuery runs the `queryFn` and if successful it returns what is returned from the `queryFn` to the `data` state. 
+First the useQuery runs the `queryFn` and if successful it returns what is returned from the `queryFn` to the `data` state.
 
 That's why I returned `res.data` from the `queryFn`. It's exactly like the try block in the `fetchData` function.
 
@@ -426,7 +425,7 @@ Exactly what we manually did with manual use of `useState` and `useEffect`.
 
 So, the useQuery hook will return a `useQueryResult` object that contains the `data`, `error` and `isPending` states.
 
-And this object can have a looot of other properties that can be used to control the query. 
+And this object can have a looot of other properties that can be used to control the query.
 
 Just take a look at the [documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery).
 
@@ -484,7 +483,6 @@ Now, go open the frontend in your browser and click the re-fetch button. You'll 
 
 This because of the `queryKey`. The `queryKey` is used to identify the query and as we are re-fetching the same query, it instantly displays the existing cached data so the UI remains interactive. If the newly fetched data has changed, TanStack Query automatically overwrites the cache and updates the React state to reflect the new data on the screen. If the fetched data is identical, it leaves the cache as-is and optimizes performance by preventing an unnecessary UI re-render
 
-
 This is awesome right? The useQuery hook is doing almost all of the heavy lifting for us.
 
 So, queryKey property is a unique key that will be used to identify the query. It's important to use a unique key for each query.
@@ -512,8 +510,8 @@ Make a new file named `queryFunctions.ts` in your `src` folder.
 import { api } from "./api";
 
 export const fetchUsers = async () => {
-    const res = await api.get("/users");
-    return res.data;
+  const res = await api.get("/users");
+  return res.data;
 };
 ```
 
@@ -572,33 +570,32 @@ One last thing is that I have to add some more `users` in the db.json file.
 
 ```json
 {
-    "users": [
-        {
-            "id": 1,
-            "name": "John Doe",
-            "email": "2B7Pd@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 2,
-            "name": "Jane Doe",
-            "email": "2B7Pd@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 3,
-            "name": "Jack Die",
-            "email": "2B7Pd@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 4,
-            "name": "Bob dope",
-            "email": "2B7Pd@example.com",
-            "password": "password123"
-        }
-
-    ]
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "2B7Pd@example.com",
+      "password": "password123"
+    },
+    {
+      "id": 2,
+      "name": "Jane Doe",
+      "email": "2B7Pd@example.com",
+      "password": "password123"
+    },
+    {
+      "id": 3,
+      "name": "Jack Die",
+      "email": "2B7Pd@example.com",
+      "password": "password123"
+    },
+    {
+      "id": 4,
+      "name": "Bob dope",
+      "email": "2B7Pd@example.com",
+      "password": "password123"
+    }
+  ]
 }
 ```
 
@@ -623,20 +620,20 @@ let's make a query function is the `queryFunctions.ts` file.
 ```tsx {.line-numbers}
 import { api } from "./api";
 export type dataType = {
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-  };
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+};
 
 export const fetchUsers = async () => {
-    const res = await api.get<dataType[]>("/users");
-    return res.data;
+  const res = await api.get<dataType[]>("/users");
+  return res.data;
 };
 
 export const fetchUserById = async (id: number) => {
-    const res = await api.get<dataType>(`/users/${id}`);
-    return res.data;
+  const res = await api.get<dataType>(`/users/${id}`);
+  return res.data;
 };
 ```
 
@@ -666,7 +663,6 @@ const RenderUser = () => {
 };
 
 export default RenderUser;
-
 ```
 
 Here, I have setup a simple input field to get the user ID and a button to fetch the user.
@@ -732,7 +728,6 @@ const RenderUser = () => {
 };
 
 export default RenderUser;
-
 ```
 
 > I'm checking the conditional states inside the RenderUser component because I don't want to break the UI or hide the input field whenever an error occurs. I want the input field to remain rendered at all times.
@@ -743,7 +738,7 @@ If you test that setup, it works perfectly on the first load for User 1. However
 
 Why? Because the useQuery hook only activates automatically when its queryKey changes.
 
-> As a component mounts, the useQuery hook activates automatically. After that, it will only re-fetch if a value inside the queryKey changes (or due to background triggers like window refocus). 
+> As a component mounts, the useQuery hook activates automatically. After that, it will only re-fetch if a value inside the queryKey changes (or due to background triggers like window refocus).
 
 TanStack Query has no idea the dependencies changed. To fix this, the state variable must be included in the key.
 
@@ -762,10 +757,10 @@ We can add a `enabled` prop to the useQuery hook to stop it from automatically r
 ```tsx {.line-numbers}
 //src/components/RenderUser.tsx
 const { data, isPending, error, refetch } = useQuery({
-    queryKey: ["user", id],
-    queryFn: () => fetchUserById(id),
-    enabled: false,
-  });
+  queryKey: ["user", id],
+  queryFn: () => fetchUserById(id),
+  enabled: false,
+});
 ```
 
 This will stop the useQuery hook from automatically running.
@@ -774,7 +769,7 @@ But the problem the query will never run if we don't use the `refetch` function.
 
 Now, we laid the groundwork that wheneven id state will change the useQuery hook will re-run.
 
-So, first we need to stop that. This might seem a little counterintuitive but everything will eventually work out. Trust me on this. 
+So, first we need to stop that. This might seem a little counterintuitive but everything will eventually work out. Trust me on this.
 
 > If we keep id inside both our typing input and the queryKey, TanStack Query gets confused the moment a user types. As you type a new number, the queryKey changes instantly. This resets the query status back to isPending and wipes your current data off the screen before you even get a chance to press the button!
 
@@ -784,9 +779,8 @@ We do this by introducing a second state variable: fetchedId.
 ```tsx {.line-numbers}
 // 1. This state tracks what the user is typing
 const [id, setId] = useState(1);
-// 2. This state ONLY updates when the button is actually clicked 
+// 2. This state ONLY updates when the button is actually clicked
 const [fetchedId, setFetchedId] = useState<number | null>(null);
-
 ```
 
 Now, instead of hooking useQuery up to our frantic typing input, we point it directly at fetchedId.
@@ -796,29 +790,28 @@ const { data, isPending, error } = useQuery({
   // Point the key and function to our submission state
   queryKey: ["user", fetchedId],
   queryFn: () => fetchUserById(fetchedId!),
-  
+
   // Magic line: Stay idle until the user actually clicks the button for the first time
-  enabled: fetchedId !== null, 
+  enabled: fetchedId !== null,
 });
 ```
 
 Look at how beautifully this solves all our problems at once:
 
-   1. **No accidental triggers**: Typing inside the input box updates id, but leaves fetchedId completely alone. The UI stays perfectly stable while typing.
-   2. **Strict button control**: The fetch only activates inside our button's handleGetUser function, where we explicitly call setFetchedId(id).
-   3. **Perfect caching**: Because fetchedId is in the queryKey, TanStack Query will cache every user individually (["user", 1], ["user", 2]). If you search for User 1, switch to User 2, and then search for User 1 again, it loads instantly from the cache without hitting your API a second time!
+1.  **No accidental triggers**: Typing inside the input box updates id, but leaves fetchedId completely alone. The UI stays perfectly stable while typing.
+2.  **Strict button control**: The fetch only activates inside our button's handleGetUser function, where we explicitly call setFetchedId(id).
+3.  **Perfect caching**: Because fetchedId is in the queryKey, TanStack Query will cache every user individually (["user", 1], ["user", 2]). If you search for User 1, switch to User 2, and then search for User 1 again, it loads instantly from the cache without hitting your API a second time!
 
 By decoupling our UI state from our network trigger state, we get the absolute best of both worlds.
-
 
 And now, we can just add a handle click function to our button that will check if the `id` is valid or not. If it is, it will set the `fetchedId` state to the `id` value and when the `fetchedId` is not null, the query will run.
 
 ```tsx {.line-numbers}
 const handleGetUser = () => {
-    if (!isNaN(id)) {
-      setFetchedId(id);
-    }
+  if (!isNaN(id)) {
+    setFetchedId(id);
   }
+};
 ```
 
 And now the only task is to bring this all togather.
@@ -843,7 +836,7 @@ const RenderUser = () => {
     if (!isNaN(id)) {
       setFetchedId(id);
     }
-  }
+  };
 
   return (
     <div>
@@ -861,7 +854,7 @@ const RenderUser = () => {
         value={id}
         onChange={(e) => setId(parseInt(e.target.value))}
       />
-      <button onClick={()=>handleGetUser()}>Get User</button>
+      <button onClick={() => handleGetUser()}>Get User</button>
     </div>
   );
 };
@@ -879,11 +872,11 @@ This is because of the `isPending` state. It is a boolean state that is set to t
 
 In this case you can use `isFetching` instead of `isPending` which is a boolean state that is by default set to false. But In any state, if the query is fetching at any time (including background refetching) isFetching will be true.
 
-> **Note**: Is pending is related to the state of the `queryFn` function. It is only false if the queryFn is in `error` or `success` state. 
+> **Note**: Is pending is related to the state of the `queryFn` function. It is only false if the queryFn is in `error` or `success` state.
 
-Now, there are a lot of other properties we can pass in the `useQuery object`. And those can ne very useful for different situations. 
+Now, there are a lot of other properties we can pass in the `useQuery object`. And those can ne very useful for different situations.
 
-The above exmpale is for `dependent querys` which are queries that depend on the results of another query. 
+The above exmpale is for `dependent querys` which are queries that depend on the results of another query.
 
 There can be multiple queries that depend on the results of another query.
 
@@ -909,15 +902,15 @@ This query can be written separately as:
 
 ```tsx {.line-numbers}
 const fetchIdQueryOption = {
-    queryKey: ["user", fetchedId],
-    queryFn: () => fetchUserById(fetchedId!),
-    enabled: fetchedId !== null,
-  };
+  queryKey: ["user", fetchedId],
+  queryFn: () => fetchUserById(fetchedId!),
+  enabled: fetchedId !== null,
+};
 
-  const { data, isPending, error, isFetching } = useQuery(fetchIdQueryOption);
+const { data, isPending, error, isFetching } = useQuery(fetchIdQueryOption);
 ```
 
-Because in the end it's just a simple object. You can export the object from other files and use it here if you want, it'll work the same. 
+Because in the end it's just a simple object. You can export the object from other files and use it here if you want, it'll work the same.
 
 Another better way to write this is using the `queryOptions` function.
 
@@ -942,10 +935,10 @@ Let's say you move the `queryOptions` object to the `queryFunctions` file.
 ```tsx {.line-numbers}
 //src/queryFunctions.ts
 const fetchIdQueryOption = queryOptions({
-    queryKey: ["user", fetchedId],
-    queryFn: () => fetchUserById(fetchedId!),
-    enabled: fetchedId !== null,
-  });
+  queryKey: ["user", fetchedId],
+  queryFn: () => fetchUserById(fetchedId!),
+  enabled: fetchedId !== null,
+});
 ```
 
 Naturally this won't work because the `queryOptions` is taking `fetchId` state as an argument but the `fetchId` state is not in the `queryFunctions` file.
@@ -954,7 +947,8 @@ So, you can turn the `fetchIdQueryOption` object into a function that returns th
 
 ```tsx {.line-numbers}
 //src/queryFunctions.ts
-const fetchIdQueryOption = (fetchedId: number) => queryOptions({
+const fetchIdQueryOption = (fetchedId: number) =>
+  queryOptions({
     queryKey: ["user", fetchedId],
     queryFn: () => fetchUserById(fetchedId!),
     enabled: fetchedId !== null,
@@ -993,7 +987,7 @@ const { data, isPending, error } = useSuspenseQuery({
 });
 ```
 
-You know that `useQuery` hook can return the data as `unavailable` because it is async. But with the `useSuspenseQuery` hook will wait for the data to be available before rendering the component. 
+You know that `useQuery` hook can return the data as `unavailable` because it is async. But with the `useSuspenseQuery` hook will wait for the data to be available before rendering the component.
 
 This hook works with the `react suspense` feature. You have to wrap the <RenderUser /> component with the <Suspense /> component in the `App` component.
 
@@ -1017,24 +1011,22 @@ Everything stays the same.
 const querieOptions1 = queryOptions({
     queryKey: ...,
     queryFn: ...,
-    enabled: ...,  
+    enabled: ...,
 })
 
 const querieOptions2 = queryOptions({
     queryKey: ...,
     queryFn: ...,
-    enabled: ...,  
+    enabled: ...,
 })
 ```
 
 You can define these re-usable query options objects and you can pass these as a array to the `useQueries` hook.
 
 ```tsx {.line-numbers}
-
 const UseQueriesExample = useQueries({
-    queries: [querieOptions1, querieOptions2]
-})
-
+  queries: [querieOptions1, querieOptions2],
+});
 ```
 
 > **Note**: The `useQueries` will take an object and inside that object you can pass a property called `queries` which is an array of query options objects.
@@ -1042,24 +1034,20 @@ const UseQueriesExample = useQueries({
 The `useQueries` hook will return an array of objects. Each object willl have the results for each query passed in the `queries` array.
 
 ```tsx {.line-numbers}
-
 const [result1, result2] = useQueries({
-    queries: [querieOptions1, querieOptions2]
-})
-
+  queries: [querieOptions1, querieOptions2],
+});
 ```
 
 If you want you can destructure the results from the array directly.
 
 ```tsx {.line-numbers}
-
 const [
   { data: data1, isPending: isPending1, error: error1 },
   { data: data2, isPending: isPending2, error: error2 },
 ] = useQueries({
-    queries: [querieOptions1, querieOptions2]
-})
-
+  queries: [querieOptions1, querieOptions2],
+});
 ```
 
 And that's it. For the very basics. You can also use `useSuspenseQueries` for multiple suspense quries and they will work the same way as `useSuspenseQuery` hook. Try it out yourself.
@@ -1068,7 +1056,7 @@ And that's it. For the very basics. You can also use `useSuspenseQueries` for mu
 
 Okay, Time to dig deeper.
 
-You guys already know that you have to pass the `queryKey` to the `useQuery` hook. 
+You guys already know that you have to pass the `queryKey` to the `useQuery` hook.
 
 Let's say you have two different `useQuery` hooks with `["users"]` and `["posts"]` query key.
 
@@ -1105,29 +1093,28 @@ I'll setup a new component in the `components` folder named `StaleFresh.tsx`.
 ```tsx {.line-numbers}
 //src/components/StaleFresh.tsx
 
-import React from 'react'
-import { fetchUsers } from '../queryFunctions'
-import { useQuery } from '@tanstack/react-query'
+import React from "react";
+import { fetchUsers } from "../queryFunctions";
+import { useQuery } from "@tanstack/react-query";
 
 const StaleFresh = () => {
-    const {data} = useQuery({
-        queryKey: ['users'],
-        queryFn: fetchUsers,
-        staleTime: 60000
-    })
+  const { data } = useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+    staleTime: 60000,
+  });
   return (
     <div>
       This is the data
       {JSON.stringify(data)}
     </div>
-  )
-}
+  );
+};
 
-export default StaleFresh
+export default StaleFresh;
 ```
 
 This component will send a request to the backend to get the data and as I've set the staleTime to 1 minute it'll keep the data fresh for 1 minute.
-
 
 Now, I'll setup a toggle button to mount and unmount the component.
 
@@ -1153,24 +1140,22 @@ You can also confirm that the data in cache is fresh by using the dev tools.
 
 You can wait 1 min and toggle the component again and you'll see that the data is being re-fetched but this time the network request is being made.
 
-So, 
+So,
 
 > Stale time defines how long cached data of a query should be kept fresh.
 
-> Fresh data means, when A data is fresh the queryFn of that query will not be called. 
+> Fresh data means, when A data is fresh the queryFn of that query will not be called.
 
-> When the staleTime is over, the cached data becomes stale and the queryFn will be called to fetch the data. And the cycle continues... 
+> When the staleTime is over, the cached data becomes stale and the queryFn will be called to fetch the data. And the cycle continues...
 
 One nice thing is, If you are fetching some static data from backend that will never change you can set the `staleTime to Infinity`.
 
 ```tsx {.line-numbers}
-
-const {data} = useQuery({
-    queryKey: ['users'],
-    queryFn: fetchUsers,
-    staleTime: Infinity
-})
-
+const { data } = useQuery({
+  queryKey: ["users"],
+  queryFn: fetchUsers,
+  staleTime: Infinity,
+});
 ```
 
 > This will keep ur data fresh forever and will fecth data only at start up but never again after that.
@@ -1194,7 +1179,7 @@ Let's say you have a function named `deleteUser` that deletes a user from the da
 ```tsx {.line-numbers}
 const deleteUser = (id) => {
   await axios.delete(`/users/${id}`);
-}
+};
 ```
 
 Now, you have a component that shows a list of users.
@@ -1254,9 +1239,8 @@ const Component = () => {
         </li>
       ))}
     </ul>
-  );  
+  );
 };
-
 ```
 
 > InvalidateQueries is method of the queryClient object. That's we have to use the `useQueryClient` hook to get the queryClient object.
@@ -1267,21 +1251,22 @@ And I made a function called `handleDelete` that calls the `deleteUser` function
 
 Now, let's understand why I'm using the `invalidateQueries` function instead of the `refetch` function.
 
-1. **Invalidation is Smart (Respects staleTime), refetch() is Brutalrefetch() forces a network request immediately, no matter what**. 
-  - It completely `ignores` your `staleTime` configurations. Even if you fetched the exact same data one second ago and it is perfectly "fresh," refetch() will blindly hit your server again.
-  - invalidateQueries() marks the data as "stale" (expired) first. It tells TanStack Query: "Hey, the data for this key is now old and dirty." 
-    - If the component using that query is currently visible on the screen, TanStack Query will instantly refetch it in the background.
-    - If the component is not on the screen (e.g., it's on a different page), TanStack Query will not fetch it right away. It will wait until the user navigates back to that page before pulling the fresh data. This saves massive amounts of server bandwidth.
+1. **Invalidation is Smart (Respects staleTime), refetch() is Brutalrefetch() forces a network request immediately, no matter what**.
 
-2. Invalidation scale across your entire app (The Network Effect) 
+- It completely `ignores` your `staleTime` configurations. Even if you fetched the exact same data one second ago and it is perfectly "fresh," refetch() will blindly hit your server again.
+- invalidateQueries() marks the data as "stale" (expired) first. It tells TanStack Query: "Hey, the data for this key is now old and dirty."
+  - If the component using that query is currently visible on the screen, TanStack Query will instantly refetch it in the background.
+  - If the component is not on the screen (e.g., it's on a different page), TanStack Query will not fetch it right away. It will wait until the user navigates back to that page before pulling the fresh data. This saves massive amounts of server bandwidth.
 
-  - Imagine you have a dashboard. You have a `UserProfile` component at the top of the screen, and a SettingsForm component at the bottom of the screen. Both rely on the ["user", id] data.
+2. Invalidation scale across your entire app (The Network Effect)
 
-  - If you change the user's name in the SettingsForm and call a manual refetch() inside that form, only that specific instance of the hook refetches. The UserProfile component at the top of the screen might stay stuck showing the old name.
+- Imagine you have a dashboard. You have a `UserProfile` component at the top of the screen, and a SettingsForm component at the bottom of the screen. Both rely on the ["user", id] data.
 
-  - If you use queryClient.invalidateQueries({ queryKey: ["user", id] }), TanStack Query `broadcasts` a message to the entire application. Every single component on the screen that cares about ["user", id] will simultaneously `refresh` itself to show the brand-new data.
+- If you change the user's name in the SettingsForm and call a manual refetch() inside that form, only that specific instance of the hook refetches. The UserProfile component at the top of the screen might stay stuck showing the old name.
 
-3. Invalidation works seamlessly with `Mutations`. I'll talk more about mutations right after this. 
+- If you use queryClient.invalidateQueries({ queryKey: ["user", id] }), TanStack Query `broadcasts` a message to the entire application. Every single component on the screen that cares about ["user", id] will simultaneously `refresh` itself to show the brand-new data.
+
+3. Invalidation works seamlessly with `Mutations`. I'll talk more about mutations right after this.
 
 One very minute details that I almost forgot to talk about is that the `invalidateQueries` function is also returning a promise. This means that `invalidateQueries` is a asyncronous function and some time might take to invalidate the query.
 
@@ -1290,3 +1275,119 @@ So, if you don't use await before calling the `invalidateQueries` function and d
 Now, let's talk about Mutations.
 
 # Mutations
+
+While `useQuery` is for fetching data, more accurately it is for `get` requests, `useMutation` is for `post`, `put`, `delete` requests.
+
+In the above example, I made a funciton named `deleteUser` that deletes a user from the database.
+
+And I'm using it raw without any try catch block and or any kind of success and error handling.
+
+`Mutation` will give us all that but with some more powerful features.
+
+`useMutation` hook works almost the same way as `useQuery` hook.
+
+```tsx {.line-numbers}
+import { useMutation } from "@tanstack/react-query";
+
+const Component = () => {
+  const { mutate } = useMutation({
+    mutationFn: (id) => {
+      return someRequest(id);
+    },
+  });
+};
+```
+
+Now, let's understand the structure. First the use `useMutation` hook takes an object just like the `useQuery` hook.
+
+Inside that function you can pass a property called `mutationFn` which is a function that will be used to make the request.
+
+If the function takes any arguments, you can get the arguments from the `useMutation` hook and then pass them in the request function with a callback.
+
+Now, the main thing here is what you will get in return from the hook. It'll return a function called `mutate`. You'll use this function to activate the request.
+
+
+So, let's turn the previous example into a mutation.
+
+```tsx {.line-numbers}
+//src/components/Mutations.tsx
+...
+
+const Mutations = () => {
+  ...
+
+  const {mutate} = useMutation({
+    mutationFn: (id: number) => deleteUser(id),
+  })
+
+  const handleDelete = (id: number) => {
+    mutate(id)
+    client.invalidateQueries({
+      queryKey: ["users"],
+    });
+  };
+
+...
+```
+
+I made a new component named `Mutations` in the `components` folder and copied and pasted the code from the previous exmple.
+
+Now, instead of directly calling the `deleteUser` function, we call the `mutate` function inside the `handleDelete` function.
+
+Now, you might ask whats point. We have a extra like and nothing changed everything should still work right?
+
+Nope, you'll see the same issue as before.The UI is not updating even after the mutation function is called.
+
+Why?
+
+Because the `mutate` activated the request but it is being handled in a asyncronous process and invalidation is being handled in another asyncronous process.
+
+So, while the invalidation is done, the request is resolved and the UI is not updated beucase the mutation function is not done deleting the user.
+
+So, we need a way to put the two together.
+
+And in the mutation function you can actually do that by passing another property called `onSuccess` to the `useMutation` hook.
+
+This property will activate only if the request of the `mutate` function is resolved.
+
+```tsx {.line-numbers}
+//src/components/Mutations.tsx
+...
+
+const Mutations = () => {
+  ...
+
+  const {mutate} = useMutation({
+    mutationFn: (id: number) => deleteUser(id),
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: ["users"],
+      });
+    }
+  })
+
+  const handleDelete = (id: number) => {
+    mutate(id)
+  };
+
+...
+```
+
+Now, if you call the `handleDelete` function, the UI will update because the `onSuccess` function will only activate if the delete request is resolved.
+
+you can also pass the `onError` property to the `useMutation` hook to tell it what to do if the request fails.
+
+Or `onSettled` property to tell it what to do after the request is successful or failed. Either way this function will activate.
+
+If you go to the official [docs](https://tanstack.com/query/v5/docs/framework/react/guides/mutations) you can see the full list of properties that you can pass to the `useMutation` hook.
+
+![alt text](image.png)
+
+Here, you can see that each property is function that give you arguments like `data, error, onMutateResults, variables and context`. 
+
+- `data` is the data that is returned from the request.
+- `error` is the error that is returned from the request.
+- `onMutate` is another sideEffect function of the `mutate` function. It executes when the `mutate` function is called. If you want to do something extra while the `mutate` function is called, you can do it here and you can return something from it.
+- `variables` is the arguments that are passed to the mutation function.
+- `onMutateResult` is the returned value of the `onMutate` function.
+- `context` is the metadata object of the mutation.
