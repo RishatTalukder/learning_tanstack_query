@@ -1282,3 +1282,11 @@ Now, let's understand why I'm using the `invalidateQueries` function instead of 
   - If you use queryClient.invalidateQueries({ queryKey: ["user", id] }), TanStack Query `broadcasts` a message to the entire application. Every single component on the screen that cares about ["user", id] will simultaneously `refresh` itself to show the brand-new data.
 
 3. Invalidation works seamlessly with `Mutations`. I'll talk more about mutations right after this. 
+
+One very minute details that I almost forgot to talk about is that the `invalidateQueries` function is also returning a promise. This means that `invalidateQueries` is a asyncronous function and some time might take to invalidate the query.
+
+So, if you don't use await before calling the `invalidateQueries` function and do some operation connected to the query that is being invalidated, the operation will be executed on the OLD data, not the newly updated data.
+
+Now, let's talk about Mutations.
+
+# Mutations

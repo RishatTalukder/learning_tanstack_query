@@ -3,7 +3,7 @@ import React from 'react'
 import { deleteUser, fetchIdQueryOption, fetchUserById, fetchUsers } from '../queryFunctions'
 
 const Invalidation = () => {
-  const {data, isfetching, error, refetch} = useQuery({
+  const {data, isFetching, error, refetch} = useQuery({
     queryKey: ['users'],
     queryFn: fetchUsers
   })
