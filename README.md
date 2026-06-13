@@ -1391,3 +1391,11 @@ Here, you can see that each property is function that give you arguments like `d
 - `variables` is the arguments that are passed to the mutation function.
 - `onMutateResult` is the returned value of the `onMutate` function.
 - `context` is the metadata object of the mutation.
+
+There are other query methods and hooks like `useInfiniteQuery`, `useQueryClient` and `useSuspenseQuery` that also have similar properties.
+
+But this article was to educated about the main three concepts of `tanstack query`.
+
+# Last words
+
+This tool longer than I expected. ciao.
